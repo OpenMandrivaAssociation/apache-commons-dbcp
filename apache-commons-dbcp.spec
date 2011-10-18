@@ -3,7 +3,7 @@
 
 Name:             apache-%{short_name}
 Version:          1.4
-Release:          6
+Release:          7
 Summary:          Apache Commons DataBase Pooling Package
 Group:            Development/Java
 License:          ASL 2.0
