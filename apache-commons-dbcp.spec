@@ -17,7 +17,7 @@ BuildRoot:        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:        noarch
 
 BuildRequires:    java-devel >= 0:1.6.0
-BuildRequires:    jpackage-utils
+BuildRequires:    jpackage-utils >= 0:1.7.5
 BuildRequires:    apache-commons-parent
 BuildRequires:    apache-commons-pool
 BuildRequires:    geronimo-parent-poms
@@ -25,11 +25,11 @@ BuildRequires:    jta
 BuildRequires:    maven-plugin-cobertura
 
 Requires:         java >= 0:1.6.0
-Requires:         jpackage-utils
+Requires:         jpackage-utils >= 0:1.7.5
 Requires:         apache-commons-pool
 
-Requires(post):   jpackage-utils
-Requires(postun): jpackage-utils
+Requires(post):   jpackage-utils >= 0:1.7.5
+Requires(postun): jpackage-utils >= 0:1.7.5
 
 # This should go away with F-17
 Provides:         jakarta-%{short_name} = 0:%{version}-%{release}
@@ -53,7 +53,7 @@ logs into the DBMS, and handles any user account issues internally.
 %package javadoc
 Summary:          Javadoc for %{name}
 Group:            Development/Java
-Requires:         jpackage-utils
+Requires:         jpackage-utils >= 0:1.7.5
 # This should go away with F-17
 Obsoletes:        jakarta-%{short_name}-javadoc < 0:1.4-1
 
