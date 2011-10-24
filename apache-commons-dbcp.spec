@@ -3,7 +3,7 @@
 
 Name:             apache-%{short_name}
 Version:          1.4
-Release:          7
+Release:          6
 Summary:          Apache Commons DataBase Pooling Package
 Group:            Development/Java
 License:          ASL 2.0
@@ -17,7 +17,7 @@ BuildRoot:        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:        noarch
 
 BuildRequires:    java-devel >= 0:1.6.0
-BuildRequires:    jpackage-utils >= 0:1.7.5
+BuildRequires:    jpackage-utils
 BuildRequires:    apache-commons-parent
 BuildRequires:    apache-commons-pool
 BuildRequires:    geronimo-parent-poms
@@ -25,11 +25,11 @@ BuildRequires:    jta
 BuildRequires:    maven-plugin-cobertura
 
 Requires:         java >= 0:1.6.0
-Requires:         jpackage-utils >= 0:1.7.5
+Requires:         jpackage-utils
 Requires:         apache-commons-pool
 
-Requires(post):   jpackage-utils >= 0:1.7.5
-Requires(postun): jpackage-utils >= 0:1.7.5
+Requires(post):   jpackage-utils
+Requires(postun): jpackage-utils
 
 # This should go away with F-17
 Provides:         jakarta-%{short_name} = 0:%{version}-%{release}
@@ -53,7 +53,7 @@ logs into the DBMS, and handles any user account issues internally.
 %package javadoc
 Summary:          Javadoc for %{name}
 Group:            Development/Java
-Requires:         jpackage-utils >= 0:1.7.5
+Requires:         jpackage-utils
 # This should go away with F-17
 Obsoletes:        jakarta-%{short_name}-javadoc < 0:1.4-1
 
