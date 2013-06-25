@@ -1,41 +1,30 @@
 %global base_name       dbcp
 %global short_name      commons-%{base_name}
 
-Name:             apache-%{short_name}
-Version:          1.4
-Release:          9
-Summary:          Apache Commons DataBase Pooling Package
-Group:            Development/Java
-License:          ASL 2.0
-URL:              http://commons.apache.org/%{base_name}/
-Source0:          http://www.apache.org/dist/commons/%{base_name}/source/%{short_name}-%{version}-src.tar.gz
-
+Summary:	Apache Commons DataBase Pooling Package
+Name:		apache-%{short_name}
+Version:	1.4
+Release:	9
+Group:		Development/Java
+License:	ASL 2.0
+Url:		http://commons.apache.org/%{base_name}/
+Source0:	http://www.apache.org/dist/commons/%{base_name}/source/%{short_name}-%{version}-src.tar.gz
 # Depmap needed to remove tomcat* deps (needed only for testing) 
 # and fix geronimo transaction
-Source1:          %{short_name}.depmap
-BuildRoot:        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildArch:        noarch
+Source1:	%{short_name}.depmap
+BuildArch:	noarch
 
-BuildRequires:    java-devel >= 0:1.6.0
-BuildRequires:    jpackage-utils
-BuildRequires:    apache-commons-parent
-BuildRequires:    apache-commons-pool
-BuildRequires:    geronimo-parent-poms
-BuildRequires:    jta
-BuildRequires:    maven-plugin-cobertura
-
-Requires:         java >= 0:1.6.0
-Requires:         jpackage-utils
-Requires:         apache-commons-pool
-
-Requires(post):   jpackage-utils
-Requires(postun): jpackage-utils
-
-# This should go away with F-17
-Provides:         jakarta-%{short_name} = 0:%{version}-%{release}
-Obsoletes:        jakarta-%{short_name} < 0:1.4-1
-Obsoletes:        jakarta-%{short_name}-tomcat5 < 0:1.4-1
-Obsoletes:        hibernate_jdbc_cache < 0:1.4-1
+BuildRequires:	apache-commons-parent
+BuildRequires:	apache-commons-pool
+BuildRequires:	geronimo-parent-poms
+BuildRequires:	java-devel >= 0:1.6.0
+BuildRequires:	jpackage-utils
+BuildRequires:	jta
+BuildRequires:	maven-plugin-cobertura
+Requires:	java >= 0:1.6.0
+Requires:	jpackage-utils
+Requires:	apache-commons-pool
+Requires(post,postun):	jpackage-utils
 
 %description
 Many Apache projects support interaction with a relational database. Creating a 
@@ -51,11 +40,11 @@ is the only time that a database connection is required. The application itself
 logs into the DBMS, and handles any user account issues internally.
 
 %package javadoc
-Summary:          Javadoc for %{name}
-Group:            Development/Java
-Requires:         jpackage-utils
+Summary:	Javadoc for %{name}
+Group:		Development/Java
+Requires:	jpackage-utils
 # This should go away with F-17
-Obsoletes:        jakarta-%{short_name}-javadoc < 0:1.4-1
+Obsoletes:	jakarta-%{short_name}-javadoc < 0:1.4-1
 
 %description javadoc
 This package contains the API documentation for %{name}.
@@ -77,8 +66,6 @@ mvn-jpp \
         install javadoc:javadoc
 
 %install
-rm -rf %{buildroot}
-
 # jars
 install -d -m 0755 %{buildroot}%{_javadir}
 install -pm 644 target/%{short_name}-%{version}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
@@ -105,18 +92,13 @@ ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
 %postun
 %update_maven_depmap
 
-%clean
-rm -rf %{buildroot}
-
 %files
-%defattr(-,root,root,-)
 %doc LICENSE.txt NOTICE.txt README.txt RELEASE-NOTES.txt
 %{_javadir}/*
 %{_mavenpomdir}/*
 %{_mavendepmapfragdir}/*
 
 %files javadoc
-%defattr(-,root,root,-)
 %doc LICENSE.txt
 %{_javadocdir}/%{name}-%{version}
 %{_javadocdir}/%{name}
