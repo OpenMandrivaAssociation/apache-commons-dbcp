@@ -22,6 +22,7 @@ BuildRequires:	java-1.7.0-devel
 BuildRequires:	jpackage-utils
 BuildRequires:	jta
 BuildRequires:	ant
+BuildConflicts: java-1.5.0-gcj
 Requires:	java >= 0:1.6.0
 Requires:	jpackage-utils
 Requires:	apache-commons-pool
