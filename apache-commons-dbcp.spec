@@ -18,7 +18,7 @@ BuildArch:	noarch
 BuildRequires:	apache-commons-parent
 BuildRequires:	apache-commons-pool
 BuildRequires:	geronimo-parent-poms
-BuildRequires:	java-1.6.0-devel
+BuildRequires:	java-1.7.0-devel
 BuildRequires:	jpackage-utils
 BuildRequires:	jta
 BuildRequires:	ant
