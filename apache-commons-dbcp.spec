@@ -4,7 +4,7 @@
 Summary:	Apache Commons DataBase Pooling Package
 Name:		apache-%{short_name}
 Version:	1.4
-Release:	9
+Release:	10
 Group:		Development/Java
 License:	ASL 2.0
 Url:		http://commons.apache.org/%{base_name}/
@@ -18,7 +18,7 @@ BuildArch:	noarch
 BuildRequires:	apache-commons-parent
 BuildRequires:	apache-commons-pool
 BuildRequires:	geronimo-parent-poms
-BuildRequires:	java-devel >= 0:1.6.0
+BuildRequires:	java-1.6.0-devel
 BuildRequires:	jpackage-utils
 BuildRequires:	jta
 BuildRequires:	ant
