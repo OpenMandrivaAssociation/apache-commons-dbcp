@@ -12,6 +12,7 @@ Source0:	http://www.apache.org/dist/commons/%{base_name}/source/%{short_name}-%{
 # Depmap needed to remove tomcat* deps (needed only for testing) 
 # and fix geronimo transaction
 Source1:	%{short_name}.depmap
+Patch0: jdbc41.patch
 BuildArch:	noarch
 
 BuildRequires:	apache-commons-parent
@@ -20,7 +21,7 @@ BuildRequires:	geronimo-parent-poms
 BuildRequires:	java-devel >= 0:1.6.0
 BuildRequires:	jpackage-utils
 BuildRequires:	jta
-BuildRequires:	maven-plugin-cobertura
+BuildRequires:	ant
 Requires:	java >= 0:1.6.0
 Requires:	jpackage-utils
 Requires:	apache-commons-pool
@@ -52,23 +53,26 @@ This package contains the API documentation for %{name}.
 %prep
 %setup -q -n %{short_name}-%{version}-src
 iconv -f iso8859-1 -t utf-8 RELEASE-NOTES.txt > RELEASE-NOTES.txt.conv && mv -f RELEASE-NOTES.txt.conv RELEASE-NOTES.txt
+%patch0
 
 %build
-export MAVEN_REPO_LOCAL=$(pwd)/.m2/repository
-
-# Skip tests, tomcat:naming-java and tomcat:naming-common not available
-mvn-jpp \
-        -e \
-        -Dmaven2.jpp.mode=true \
-        -Dmaven2.jpp.depmap.file="%{SOURCE1}" \
-        -Dmaven.test.skip=true \
-        -Dmaven.repo.local=$MAVEN_REPO_LOCAL \
-        install javadoc:javadoc
+export CLASSPATH=$(build-classpath jta jdbc-stdext xerces-j2)
+ant \
+        -Dcommons-pool.jar=$(build-classpath commons-pool) \
+        -Djdbc20ext.jar=$(build-classpath jdbc-stdext) \
+        -Djunit.jar=$(build-classpath junit) \
+        -Dxerces.jar=$(build-classpath xerces-j2) \
+        -Dxml-apis.jar=$(build-classpath xml-commons-jaxp-1.3-apis) \
+        -Dnaming-common.jar=$(build-classpath tomcat5/naming-resources) \
+        -Dnaming-java.jar=$(build-classpath tomcat5/naming-factory) \
+        -Dlogging.jar=$(build-classpath commons-logging) \
+        -Djava.io.tmpdir=. \
+        dist
 
 %install
 # jars
 install -d -m 0755 %{buildroot}%{_javadir}
-install -pm 644 target/%{short_name}-%{version}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
+install -pm 644 dist/%{short_name}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
 (cd %{buildroot}%{_javadir} && for jar in *-%{version}*; do ln -sf ${jar} `echo $jar| sed  "s|apache-||g"`; done)
 (cd %{buildroot}%{_javadir} && for jar in *-%{version}*; do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
 
@@ -83,7 +87,7 @@ install -pm 644 pom.xml %{buildroot}%{_mavenpomdir}/JPP-%{short_name}.pom
 
 # javadoc
 install -d -m 0755 %{buildroot}%{_javadocdir}/%{name}-%{version}
-cp -pr target/site/api*/* %{buildroot}%{_javadocdir}/%{name}-%{version}/
+cp -pr dist/docs/api*/* %{buildroot}%{_javadocdir}/%{name}-%{version}/
 ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
 
 %post
