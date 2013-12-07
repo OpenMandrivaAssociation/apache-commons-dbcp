@@ -4,7 +4,7 @@
 Summary:	Apache Commons DataBase Pooling Package
 Name:		apache-%{short_name}
 Version:	1.4
-Release:	13
+Release:	14
 Group:		Development/Java
 License:	ASL 2.0
 Url:		http://commons.apache.org/%{base_name}/
