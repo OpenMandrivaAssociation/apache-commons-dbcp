@@ -22,7 +22,11 @@ BuildRequires:    jpackage-utils
 BuildRequires:    apache-commons-parent
 BuildRequires:    apache-commons-pool
 BuildRequires:    geronimo-parent-poms
+%if 0%{?fedora}
 BuildRequires:    jta
+%else
+BuildRequires:    geronimo-jta
+%endif
 BuildRequires:    maven-plugin-cobertura
 BuildRequires:    maven-local
 
