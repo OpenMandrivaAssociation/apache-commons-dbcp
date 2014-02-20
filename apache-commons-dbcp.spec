@@ -1,52 +1,56 @@
+%{?_javapackages_macros:%_javapackages_macros}
 %global base_name       dbcp
 %global short_name      commons-%{base_name}
 
-Summary:	Apache Commons DataBase Pooling Package
-Name:		apache-%{short_name}
-Version:	1.4
-Release:	11
-Group:		Development/Java
-License:	ASL 2.0
-Url:		http://commons.apache.org/%{base_name}/
-Source0:	http://www.apache.org/dist/commons/%{base_name}/source/%{short_name}-%{version}-src.tar.gz
-# Depmap needed to remove tomcat* deps (needed only for testing) 
-# and fix geronimo transaction
-Source1:	%{short_name}.depmap
-Patch0: jdbc41.patch
-BuildArch:	noarch
+Name:             apache-%{short_name}
+Version:          1.4
+Release:          14.0%{?dist}
+Summary:          Apache Commons DataBase Pooling Package
 
-BuildRequires:	apache-commons-parent
-BuildRequires:	apache-commons-pool
-BuildRequires:	geronimo-parent-poms
-BuildRequires:	java-1.6.0-devel
-BuildRequires:	jpackage-utils
-BuildRequires:	jta
-BuildRequires:	ant
-BuildConflicts: java-1.5.0-gcj
-Requires:	java >= 0:1.6.0
-Requires:	jpackage-utils
-Requires:	apache-commons-pool
-Requires(post,postun):	jpackage-utils
+License:          ASL 2.0
+URL:              http://commons.apache.org/%{base_name}/
+Source0:          http://www.apache.org/dist/commons/%{base_name}/source/%{short_name}-%{version}-src.tar.gz
+
+# Depmap needed to remove tomcat* deps (needed only for testing)
+# and fix geronimo transaction
+Source1:          %{short_name}.depmap
+Patch0:           jdbc41.patch
+BuildArch:        noarch
+
+BuildRequires:    java-devel
+BuildRequires:    jpackage-utils
+BuildRequires:    apache-commons-parent
+BuildRequires:    apache-commons-pool
+BuildRequires:    geronimo-parent-poms
+%if 0%{?fedora}
+BuildRequires:    jta
+%else
+BuildRequires:    geronimo-jta
+%endif
+BuildRequires:    maven-plugin-cobertura
+BuildRequires:    maven-local
+
+# This should go away with F-17
+Provides:         jakarta-%{short_name} = 0:%{version}-%{release}
+Obsoletes:        jakarta-%{short_name} < 0:1.4-1
+Obsoletes:        jakarta-%{short_name}-tomcat5 < 0:1.4-1
+Obsoletes:        hibernate_jdbc_cache < 0:1.4-1
 
 %description
-Many Apache projects support interaction with a relational database. Creating a 
-new connection for each user can be time consuming (often requiring multiple 
-seconds of clock time), in order to perform a database transaction that might 
-take milliseconds. Opening a connection per user can be unfeasible in a 
-publicly-hosted Internet application where the number of simultaneous users can 
-be very large. Accordingly, developers often wish to share a "pool" of open 
-connections between all of the application's current users. The number of users 
-actually performing a request at any given time is usually a very small 
-percentage of the total number of active users, and during request processing 
-is the only time that a database connection is required. The application itself 
+Many Apache projects support interaction with a relational database. Creating a
+new connection for each user can be time consuming (often requiring multiple
+seconds of clock time), in order to perform a database transaction that might
+take milliseconds. Opening a connection per user can be unfeasible in a
+publicly-hosted Internet application where the number of simultaneous users can
+be very large. Accordingly, developers often wish to share a "pool" of open
+connections between all of the application's current users. The number of users
+actually performing a request at any given time is usually a very small
+percentage of the total number of active users, and during request processing
+is the only time that a database connection is required. The application itself
 logs into the DBMS, and handles any user account issues internally.
 
 %package javadoc
-Summary:	Javadoc for %{name}
-Group:		Development/Java
-Requires:	jpackage-utils
-# This should go away with F-17
-Obsoletes:	jakarta-%{short_name}-javadoc < 0:1.4-1
+Summary:          Javadoc for %{name}
 
 %description javadoc
 This package contains the API documentation for %{name}.
@@ -54,57 +58,68 @@ This package contains the API documentation for %{name}.
 %prep
 %setup -q -n %{short_name}-%{version}-src
 iconv -f iso8859-1 -t utf-8 RELEASE-NOTES.txt > RELEASE-NOTES.txt.conv && mv -f RELEASE-NOTES.txt.conv RELEASE-NOTES.txt
+
 %patch0
 
+%mvn_alias : org.apache.commons:%{short_name}
+%mvn_file : %{name} %{short_name}
+
 %build
-export CLASSPATH=$(build-classpath jta jdbc-stdext xerces-j2)
-ant \
-        -Dcommons-pool.jar=$(build-classpath commons-pool) \
-        -Djdbc20ext.jar=$(build-classpath jdbc-stdext) \
-        -Djunit.jar=$(build-classpath junit) \
-        -Dxerces.jar=$(build-classpath xerces-j2) \
-        -Dxml-apis.jar=$(build-classpath xml-commons-jaxp-1.3-apis) \
-        -Dnaming-common.jar=$(build-classpath tomcat5/naming-resources) \
-        -Dnaming-java.jar=$(build-classpath tomcat5/naming-factory) \
-        -Dlogging.jar=$(build-classpath commons-logging) \
-        -Djava.io.tmpdir=. \
-        dist
+# Skip tests, tomcat:naming-java and tomcat:naming-common not available
+%mvn_build -f
 
 %install
-# jars
-install -d -m 0755 %{buildroot}%{_javadir}
-install -pm 644 dist/%{short_name}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
-(cd %{buildroot}%{_javadir} && for jar in *-%{version}*; do ln -sf ${jar} `echo $jar| sed  "s|apache-||g"`; done)
-(cd %{buildroot}%{_javadir} && for jar in *-%{version}*; do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
+%mvn_install
 
-# pom
-install -d -m 755 %{buildroot}%{_mavenpomdir}
-install -pm 644 pom.xml %{buildroot}%{_mavenpomdir}/JPP-%{short_name}.pom
-%add_to_maven_depmap org.apache.commons %{short_name} %{version} JPP %{short_name}
-
-# following line is only for backwards compatibility. New packages
-# should use proper groupid org.apache.commons and also artifactid
-%add_to_maven_depmap %{short_name} %{short_name} %{version} JPP %{short_name}
-
-# javadoc
-install -d -m 0755 %{buildroot}%{_javadocdir}/%{name}-%{version}
-cp -pr dist/docs/api*/* %{buildroot}%{_javadocdir}/%{name}-%{version}/
-ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
-
-%post
-%update_maven_depmap
-
-%postun
-%update_maven_depmap
-
-%files
+%files -f .mfiles
 %doc LICENSE.txt NOTICE.txt README.txt RELEASE-NOTES.txt
-%{_javadir}/*
-%{_mavenpomdir}/*
-%{_mavendepmapfragdir}/*
 
-%files javadoc
-%doc LICENSE.txt
-%{_javadocdir}/%{name}-%{version}
-%{_javadocdir}/%{name}
+%files javadoc -f .mfiles-javadoc
+%doc LICENSE.txt NOTICE.txt
 
+%changelog
+* Thu Aug  8 2013 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1.4-14
+- Update to latest packaging guidelines
+
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
+* Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
+* Wed Feb 06 2013 Java SIG <java-devel@lists.fedoraproject.org> - 1.4-11
+- Update for https://fedoraproject.org/wiki/Fedora_19_Maven_Rebuild
+- Replace maven BuildRequires with maven-local
+
+* Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Thu Feb 23 2012 Pavel Tisnovsky <ptisnovs@redhat.com> - 1.4-9
+- Make this package independent of OpenJDK6 (it's buildable on OpenJDK7)
+
+* Thu Jan 12 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Thu Dec  1 2011 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1.4-7
+- Build with maven 3
+- Fixes according to latest guidelines
+
+* Mon Feb 07 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Tue Nov 9 2010 Chris Spike <chris.spike@arcor.de> 1.4-5
+- Removed maven* BRs in favour of apache-commons-parent
+- Added deprecated groupId to depmap for compatibility reasons
+- Removed commons-pool from custom depmap
+
+* Wed Oct 27 2010 Chris Spike <chris.spike@arcor.de> 1.4-4
+- Added depmap entry to find commons-pool.jar
+
+* Wed Oct 27 2010 Chris Spike <chris.spike@arcor.de> 1.4-3
+- Added BR apache-commons-pool
+
+* Mon Oct 18 2010 Chris Spike <chris.spike@arcor.de> 1.4-2
+- Removed Epoch
+
+* Mon Oct 4 2010 Chris Spike <chris.spike@arcor.de> 1.4-1
+- Rename and rebase from jakarta-commons-dbcp
